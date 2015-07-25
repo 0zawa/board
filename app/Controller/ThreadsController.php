@@ -4,17 +4,9 @@ App::uses('AppController', 'Controller');
  * Threads Controller
  *
  * @property Thread $Thread
- * @property PaginatorComponent $Paginator
  */
 class ThreadsController extends AppController {
 
-/**
- * Components
- *
- * @var array
- */
-	//public $components = array('Paginator');
-	//public $components = array('');
   public $uses = array('Thread','Token','Tag');
   public $autoRender = false;
 
@@ -24,13 +16,10 @@ class ThreadsController extends AppController {
  * @return void
  */
 	public function index() {
-		//$this->Thread->recursive = 0;
-		//$this->set('threads', $this->Paginator->paginauserste());
-    //$response = array('status'=>'okk');
-    //$this->response->body(json_encode($response));
     $token = $this->request->header('X-Token');
     $user_id = $this->Token->get_user_id($token);
     if($user_id < 0) {
+      $this->log('invalid token:'.$token,'error');
       $response = array('status'=>'ng','message'=>'invalid token');
       $this->response->body(json_encode($response));
       return;
@@ -58,11 +47,20 @@ class ThreadsController extends AppController {
  */
 	public function view($id = null) {
 		if (!$this->Thread->exists($id)) {
-			//throw new NotFoundException(__('Invalid thread'));
+      $this->log('therad not found:'.$id,'error');
       $response = array('status'=>'ng','message'=>'thread not found');
       $this->request->body(json_encode($response));
       return;
 		}
+    
+    $token = $this->request->header('X-Token');
+    $user_id = $this->Token->get_user_id($token);
+    if($user_id < 0) {
+      $this->log('invalid token:'.$token,'error');
+      $response = array('status'=>'ng','message'=>'invalid token');
+      $this->response->body(json_encode($response));
+      return;
+    }
 
 		$options = array('conditions' => array('Thread.' . $this->Thread->primaryKey => $id));
     $result = $this->Thread->find('first', $options);
@@ -79,17 +77,9 @@ class ThreadsController extends AppController {
 		if ($this->request->is('post')) {
       $token = $this->request->header('X-Token');
       
-      /*
-      $token_record = $this->Token->find('first',array('conditions'=>array('token'=>$token)));
-      if(empty($token_record)) {
-        $response = array('status'=>'ng','message'=>'invalid token');
-        $this->response->body(json_encode($response));
-        return;
-      }
-      $user_id = $token_record['Token']['user_id'];
-      */
       $user_id = $this->Token->get_user_id($token);
       if($user_id < 0) {
+        $this->log('invalid token:'.$token,'error');
         $response = array('status'=>'ng','message'=>'invalid token');
         $this->response->body(json_encode($response));
         return;
@@ -100,7 +90,6 @@ class ThreadsController extends AppController {
       $request->user_id = $user_id;
       $request->created_at = $current;
       $request->updated_at = $current;
-
 
 			$this->Thread->create();
 			if ($this->Thread->save($request)) {
@@ -118,34 +107,12 @@ class ThreadsController extends AppController {
           'created_at'=>$current,
           'created_by'=>$user_id,
         );
-				//return $this->flash(__('The thread has been saved.'), array('action' => 'index'));
         $this->response->body(json_encode($response));
 			}
 		}
 	}
 
-/**
- * edit method
- *
- * @throws NotFoundException
- * @param string $id
- * @return void
- */
- /*
-	public function edit($id = null) {
-		if (!$this->Thread->exists($id)) {
-			throw new NotFoundException(__('Invalid thread'));
-		}
-		if ($this->request->is(array('post', 'put'))) {
-			if ($this->Thread->save($this->request->data)) {
-				return $this->flash(__('The thread has been saved.'), array('action' => 'index'));
-			}
-		} else {
-			$options = array('conditions' => array('Thread.' . $this->Thread->primaryKey => $id));
-			$this->request->data = $this->Thread->find('first', $options);
-		}
-	}
-  */
+
 
 /**
  * delete method
@@ -157,7 +124,6 @@ class ThreadsController extends AppController {
 	public function delete($id = null) {
 		$this->Thread->id = $id;
 		if (!$this->Thread->exists()) {
-			///throw new NotFoundException(__('Invalid thread'));
       $response = array('status'=>'ng','message'=>'thread not found');
       $this->request->body(json_encode($response));
       return;
@@ -167,17 +133,10 @@ class ThreadsController extends AppController {
     $thread = $this->Thread->find('first', $options);
          
     $token = $this->request->header('X-Token');
-    /*
-    $token_record = $this->Token->find('first',array('conditions'=>array('token'=>$token)));
-    if(empty($token_record)) {
-      $response = array('status'=>'ng','message'=>'invalid token');
-      $this->response->body(json_encode($response));
-      return;
-    }
-    $user_id = $token_record['Token']['user_id'];
-    */
+    
     $user_id = $this->Token->get_user_id($token);
     if($user_id < 0) {
+      $this->log('invalid token:'.$token,'error');
       $response = array('status'=>'ng','message'=>'invalid token');
       $this->response->body(json_encode($response));
       return;
@@ -185,6 +144,7 @@ class ThreadsController extends AppController {
 
     $thread = $this->Thread->find('first',array('conditions'=>array('thread_id'=>$id,'user_id'=>$user_id)));
     if(empty($thread)) {
+      $this->log('only owner can delete thread:'.$user_id,'error');
       $response = array('status'=>'ng','message'=>'only owner can delete thread');
       $this->response->body(json_encode($response));
       return;
@@ -192,12 +152,16 @@ class ThreadsController extends AppController {
 
 		$this->request->allowMethod('post', 'delete');
 		if ($this->Thread->delete()) {
-			//return $this->flash(__('The thread has been deleted.'), array('action' => 'index'));
       $response = array('status'=>'ok','id'=>$id,'created_at'=>$thread['Thread']['created_at']);
       $this->response->body(json_encode($response));
 		} else {
-			//return $this->flash(__('The thread could not be deleted. Please, try again.'), array('action' => 'index'));
-      $response = array('status'=>'ng','message'=>'failed to delete thread', 'id'=>$id,'created_at'=>$thread['Thread']['created_at']);
+      $this->log('failed to delete thread','error');
+      $response = array(
+        'status'=>'ng',
+        'message'=>'failed to delete thread', 
+        'id'=>$id,
+        'created_at'=>$thread['Thread']['created_at']
+      );
       $this->response->body(json_encode($response));
 		}
 	}

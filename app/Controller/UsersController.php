@@ -16,40 +16,23 @@ class UsersController extends AppController {
 	public $components = array('Auth');
   public $autoRender = false;
 
-
-
-/**
- * index method
- *
- * @return void
- */
-  /*
-	public function index() {
-		//$this->User->recursive = 0;
-    //$this->autoRender = false;
-		//$this->set('users', $this->Paginator->paginate());
-
-    $response = array('status'=>'ok');
-    $this->response->body(json_encode($response));
-	}
-  */
-
 /**
  * view method
  *
- * @throws NotFoundException
  * @param string $id
  * @return void
  */
 	public function view($id = null) {
 		if (!$this->User->exists($id)) {
-			throw new NotFoundException(__('Invalid user'));
+      $this->log('user not found:'.$id, 'error');
+      $response = array('status'=>'ng','message'=>'user not found');
+      $this->response->body(json_encode($response));
+      return;
 		}
 
 		$options = array('conditions' => array('User.' . $this->User->primaryKey => $id));
-		//$this->set('user', $this->User->find('first', $options));
-    $response = $this->User->find('first',$options);
-    $this->response->body(json_encode($response['User']));
+    $record = $this->User->find('first',$options);
+    $this->response->body(json_encode($record['User']));
 	}
 
 /**
@@ -63,56 +46,18 @@ class UsersController extends AppController {
       $request->password = $this->Auth->blowfish($request->password);
 			$this->User->create();
 			if ($this->User->save($request)) {
-				//return $this->flash(__('The user has been saved.'), array('action' => 'index'));
         $response = array(
           'status'=>'ok',
           'id'=> $this->User->getLastInsertID()
           );
-        $this->response->body(json_encode($response));
-			}
-		}
-	}
-
-/**
- * edit method
- *
- * @throws NotFoundException
- * @param string $id
- * @return void
- */
- /*
-	public function edit($id = null) {
-		if (!$this->User->exists($id)) {
-			throw new NotFoundException(__('Invalid user'));
-		}
-		if ($this->request->is(array('post', 'put'))) {
-			if ($this->User->save($this->request->data)) {
-				return $this->flash(__('The user has been saved.'), array('action' => 'index'));
-			}
+			} else {
+        $this->log('failed to add user:'$request->name,'error');
+        $response = array('status'=>'ok','message'=>'failed to add user');
 		} else {
-			$options = array('conditions' => array('User.' . $this->User->primaryKey => $id));
-			$this->request->data = $this->User->find('first', $options);
-		}
-	}
-  */
+      $this->log('invalid http method:'.$this->request->method(), 'error');
+      $response = array('status'=>'ng','message'=>'invalid http method');
+    }
 
-/**
- * delete method
- *
- * @throws NotFoundException
- * @param string $id
- * @return void
- */
-	public function delete($id = null) {
-		$this->User->id = $id;
-		if (!$this->User->exists()) {
-			throw new NotFoundException(__('Invalid user'));
-		}
-		$this->request->allowMethod('post', 'delete');
-		if ($this->User->delete()) {
-			return $this->flash(__('The user has been deleted.'), array('action' => 'index'));
-		} else {
-			return $this->flash(__('The user could not be deleted. Please, try again.'), array('action' => 'index'));
-		}
+    $this->response->body(json_encode($response));
 	}
 }
