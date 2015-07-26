@@ -2,22 +2,18 @@
 App::uses('AppController', 'Controller');
 /**
  * Users Controller
+ * ユーザーの登録/取得を行う.
  *
  * @property User $User
- * @property PaginatorComponent $Paginator
  */
 class UsersController extends AppController {
 
-/**
- * Components
- *
- * @var array
- */
-	public $components = array('Auth');
+	public $components = array('Auth'); /// パスワードハッシュ用.
   public $autoRender = false;
 
 /**
  * view method
+ * ユーザーの取得.
  *
  * @param string $id
  * @return void
@@ -25,39 +21,44 @@ class UsersController extends AppController {
 	public function view($id = null) {
 		if (!$this->User->exists($id)) {
       $this->log('user not found:'.$id, 'error');
-      $response = array('status'=>'ng','message'=>'user not found');
-      $this->response->body(json_encode($response));
-      return;
+      return $this->send_ng('user not found');
 		}
 
-		$options = array('conditions' => array('User.' . $this->User->primaryKey => $id));
+		$options = array('conditions' => array('User.' . $this->User->primaryKey => $id),'fields'=>array('user_id','name'));
     $record = $this->User->find('first',$options);
-    $this->response->body(json_encode($record['User']));
+
+    $this->send_ok($record['User']);
 	}
 
 /**
  * add method
- *
+ * ユーザーの追加.
  * @return void
  */
 	public function add() {
 		if ($this->request->is('post')) {
       $request = $this->request->input('json_decode');
-      $request->password = $this->Auth->blowfish($request->password);
+      $request->password = $this->Auth->hash($request->password);
+
+      if($this->User->find('count',array('conditions'=>array('name'=>$request->name)))>0) {
+        $this->log('user name already exist:'.$request->name,'error');
+        return $this->send_ng('user name already exist');
+      }
+
 			$this->User->create();
 			if ($this->User->save($request)) {
         $response = array(
-          'status'=>'ok',
-          'id'=> $this->User->getLastInsertID()
-          );
+          'id'=> $this->User->getLastInsertID(),
+          'name'=>$request->name,
+        );
+        return $this->send_ok($response);
 			} else {
-        $this->log('failed to add user:'$request->name,'error');
-        $response = array('status'=>'ok','message'=>'failed to add user');
+        $this->log('failed to add user:'.$request->name,'error');
+        return $this->send_ng('failed to add user');
+      }
 		} else {
       $this->log('invalid http method:'.$this->request->method(), 'error');
-      $response = array('status'=>'ng','message'=>'invalid http method');
+      return $this->send_ng('invalid htttp method');
     }
-
-    $this->response->body(json_encode($response));
 	}
 }

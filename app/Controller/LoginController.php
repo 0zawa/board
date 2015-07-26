@@ -2,7 +2,7 @@
 App::uses('AppController', 'Controller');
 /**
  * Login Controller
- *
+ * ユーザーのログイン処理を行う.
  */
 class LoginController extends AppController {
 
@@ -18,25 +18,26 @@ class LoginController extends AppController {
 	public function index() {
     if($this->request->is('post')) {
       $request = $this->request->input('json_decode');
-      $blowfish = $this->Auth->blowfish($request->password);
-      $options = array('conditions' => array('name'=> $request->name,'password'=>$blowfish));
+      $hash = $this->Auth->hash($request->password);
+
+      $options = array('conditions' => array('name'=> $request->name,'password'=>$hash));
       $record = $this->User->find('first',$options);
 
       if(empty($record)) {
         $this->log('user not found:'.$request->name, 'error');
-        $response = array('status' => 'ng', 'message' => 'user not found');
+        return $this->send_ng('user not found');
       } else {
         /// @ref http://www.websec-room.com/2013/03/05/443
         $uuid = bin2hex(openssl_random_pseudo_bytes(16));
         $token = array(
-          'user_id'=>$result['User']['id'],
+          'user_id'=>$record['User']['user_id'],
           'token'=>$uuid,
           'expired_at'=>date("Y-m-d H:i:s",strtotime("+1 day"))
         );
         $this->Token->setToken($token);
-        $response = array('status' => 'ok', 'token' => $uuid);
+        $response = array('token' => $uuid);
       }
-      $this->response->body(json_encode($response));
+      return $this->send_ok($response);
     }
 	}
 }

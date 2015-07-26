@@ -31,4 +31,15 @@ App::uses('Controller', 'Controller');
  * @link		http://book.cakephp.org/2.0/en/controllers.html#the-app-controller
  */
 class AppController extends Controller {
+
+  public function send_ok($response) {
+    $this->response->statusCode(200);
+    $this->response->body(json_encode($response));
+  }
+
+  public function send_ng($message) {
+    $this->response->statusCode(500);
+    $this->response->body(json_encode(array('message'=>$message)));
+  }
+
 }

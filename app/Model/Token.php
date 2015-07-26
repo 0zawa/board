@@ -54,6 +54,7 @@ class Token extends AppModel {
   public function setToken($token) {
     $query = "INSERT INTO tokens (user_id,token,expired_at) VALUES (:user_id,:token,:expired_at) ON DUPLICATE KEY UPDATE token=:token,expired_at=:expired_at";
     $params = array('user_id'=>$token['user_id'],'token'=>$token['token'],'expired_at'=>$token['expired_at']);
+    //$params = array($token['user_id'],$token['token'],$token['expired_at'],$token['token'],$token['expired_at']);
     $this->query($query,$params);
     $this->log($this->getDataSource()->getLog(),'debug');
   }

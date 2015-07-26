@@ -20,18 +20,23 @@ class PostsController extends AppController {
 	public function view($id = null) {
 		if (!$this->Post->exists($id)) {
       $this->log('post not found:'.$id,'error');
+      /*
       $response = array('status'=>'ng','message'=>'post not found');
       $this->response->body(json_encode($response));
       return;
+      */
+      return $this->send_ng('post not found');
 		}
 
     $token = $this->request->header('X-Token');
     $user_id = $this->Token->get_user_id($token);
     if($user_id<0) {
       $this->log('invalid token:'.$token,'error');
+      /*
       $response = array('status'=>'ng','message'=>'invalid token');
       $this->response->body(json_encode($response));
-      return;
+      */
+      return $this->send_ng('invalid token');
     }
 
 		$options = array('conditions' => array('Post.' . $this->Post->primaryKey => $id));
@@ -44,7 +49,8 @@ class PostsController extends AppController {
       'created_at'=>$record['created_at'],
       'created_by'=>$record['user_id'],
     );
-    $this->response->body(json_encode($response));
+    //$this->response->body(json_encode($response));
+    return $this->send_ok($response);
 	}
 
 /**
@@ -59,9 +65,11 @@ class PostsController extends AppController {
       $user_id = $this->Token->get_user_id($token);
       if($user_id<0) {
         $this->log('invalid token:'.$token,'error');
+        /*
         $response = array('status'=>'ng','message'=>'invalid token');
         $this->response->body(json_encode($response));
-        return;
+        */
+        return $this->send_ng('invalid token');
       }
 
       $current = date("Y-m-d H:i:s");
@@ -81,12 +89,14 @@ class PostsController extends AppController {
           'created_at'=>$current,
           'created_by'=>$user_id,
         );
+        return $this->send_ok($response);
 			} else {
         $this->log('failed to add post:'.$request->content, 'error');
-        $response = array('status'=>'ng','message'=>'failed to add post');
+        //$response = array('status'=>'ng','message'=>'failed to add post');
+        return $this->send_ng('failed to add post');
       }
        
-      $this->response->body(json_encode($response));
+      //$this->response->body(json_encode($response));
 		}
 	}
 }

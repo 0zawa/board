@@ -124,9 +124,13 @@ class ThreadsController extends AppController {
 	public function delete($id = null) {
 		$this->Thread->id = $id;
 		if (!$this->Thread->exists()) {
+      /*
       $response = array('status'=>'ng','message'=>'thread not found');
       $this->request->body(json_encode($response));
       return;
+      */
+      $this->log('thread not found:'.$id,'error');
+      return $this->send_ng('thread not found');
 		}
     
     $options = array('conditions' => array('Thread.' . $this->Thread->primaryKey => $id));
@@ -137,25 +141,36 @@ class ThreadsController extends AppController {
     $user_id = $this->Token->get_user_id($token);
     if($user_id < 0) {
       $this->log('invalid token:'.$token,'error');
+      /*
       $response = array('status'=>'ng','message'=>'invalid token');
       $this->response->body(json_encode($response));
+      */
+      $this->send_ng('invalid token');
       return;
     }
 
     $thread = $this->Thread->find('first',array('conditions'=>array('thread_id'=>$id,'user_id'=>$user_id)));
     if(empty($thread)) {
       $this->log('only owner can delete thread:'.$user_id,'error');
+      /*
       $response = array('status'=>'ng','message'=>'only owner can delete thread');
       $this->response->body(json_encode($response));
+      */
+      $this->send_ng('only owner can delete thread');
       return;
     }
 
 		$this->request->allowMethod('post', 'delete');
 		if ($this->Thread->delete()) {
+      /*
       $response = array('status'=>'ok','id'=>$id,'created_at'=>$thread['Thread']['created_at']);
       $this->response->body(json_encode($response));
+      */
+      $response = array('id'=>$id,'created_at'=>$thread['Thread']['created_at']);
+      $this->send_ok($response);
 		} else {
       $this->log('failed to delete thread','error');
+      /*
       $response = array(
         'status'=>'ng',
         'message'=>'failed to delete thread', 
@@ -163,6 +178,8 @@ class ThreadsController extends AppController {
         'created_at'=>$thread['Thread']['created_at']
       );
       $this->response->body(json_encode($response));
+      */
+      $this->send_ng('failed to delete thread');
 		}
 	}
 }
