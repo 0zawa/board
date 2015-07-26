@@ -59,6 +59,10 @@ curl -X POST -H "Content-Type: application/json" http://example.com/api/v1/login
 ```
 
 ## スレッド
+
+スレッド操作系APIは全てにHTTPヘッダ「X-Token」を追加し、
+値にログイン時の戻り値のアクセストークンを入れる.
+
 ### 作成
 #### リクエスト
 
@@ -111,6 +115,9 @@ curl -X GET -H "Content-Type: application/json" -H "X-Token:18beda5def56451a8ccc
 ```
 
 ## ポスト
+
+ポスト操作系APIは全てにHTTPヘッダ「X-Token」を追加し、
+値にログイン時の戻り値のアクセストークンを入れる.
 
 ### 作成
 #### リクエスト
