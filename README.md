@@ -1,50 +1,161 @@
-# CakePHP
+# Board
+下記の機能を持つCakePHPプロジェクトです。
 
-[![Latest Stable Version](https://poser.pugx.org/cakephp/cakephp/v/stable.svg)](https://packagist.org/packages/cakephp/cakephp)
-[![License](https://poser.pugx.org/cakephp/cakephp/license.svg)](https://packagist.org/packages/cakephp/cakephp)
-[![Bake Status](https://secure.travis-ci.org/cakephp/cakephp.png?branch=master)](http://travis-ci.org/cakephp/cakephp)
-[![Code consistency](http://squizlabs.github.io/PHP_CodeSniffer/analysis/cakephp/cakephp/grade.svg)](http://squizlabs.github.io/PHP_CodeSniffer/analysis/cakephp/cakephp/)
+* ユーザーの追加/取得/認証
+* 24時間有効なアクセストークンでの認証
+* スレッドの投稿/取得/削除/タグ指定での検索
+* ポストの投稿/取得
 
-[![CakePHP](http://cakephp.org/img/cake-logo.png)](http://www.cakephp.org)
+# 設置方法
+以下のAPIの説明は下記のように設置したものと仮定します。
 
-CakePHP is a rapid development framework for PHP which uses commonly known design patterns like Active Record, Association Data Mapping, Front Controller and MVC.
-Our primary goal is to provide a structured framework that enables PHP users at all levels to rapidly develop robust web applications, without any loss to flexibility.
+## DocumentRoot
+/var/www/html
 
+## プロジェクト設置位置
+/var/www/board 
 
-## Some Handy Links
+## シンボリックリンクの作成
+/var/www/html/api/v1 # v1は/var/www/board/app/webrootへのシンボリックリンク
 
-[CakePHP](http://www.cakephp.org) - The rapid development PHP framework
+# APIドキュメント
 
-[CookBook](http://book.cakephp.org) - THE CakePHP user documentation; start learning here!
+## ユーザー
+### 作成
 
-[API](http://api.cakephp.org) - A reference to CakePHP's classes
+#### リクエスト
+```bash
+curl -X POST -H "Content-Type: application/json" https://example.com/api/v1/users -d '{"name":"ozawa","password":"qwerty","mail":"ozawa@example.com”}'
+```
 
-[Plugins](http://plugins.cakephp.org/) - A repository of extensions to the framework
+#### レスポンス
+```
+{"id":"8","name":"ozawa”}
+```
+### 取得
+#### リクエスト
 
-[The Bakery](http://bakery.cakephp.org) - Tips, tutorials and articles
+```bash
+curl -X GET https://example.com/api/v1/users/7
+```
 
-[Community Center](http://community.cakephp.org) - A source for everything community related
+#### レスポンス
 
-[Training](http://training.cakephp.org) - Join a live session and get skilled with the framework
+```
+{"id":"8","name":"ozawa”}
+```
 
-[CakeFest](http://cakefest.org) - Don't miss our annual CakePHP conference
+## ログイン
+#### リクエスト
 
-[Cake Software Foundation](http://cakefoundation.org) - Promoting development related to CakePHP
+```bash
+curl -X POST -H "Content-Type: application/json" http://example.com/api/v1/login -d '{"name":"ozawa","password":"qwerty”}'
+```
 
+#### レスポンス
 
-## Get Support!
+```
+{"token":"18beda5def56451a8cccdd7c62659bd1”}
+```
 
-[#cakephp](http://webchat.freenode.net/?channels=#cakephp) on irc.freenode.net - Come chat with us, we have cake
+## スレッド
 
-[Google Group](https://groups.google.com/group/cake-php) - Community mailing list and forum
+スレッド操作系APIは全てにHTTPヘッダ「X-Token」を追加し、
+値にログイン時の戻り値のアクセストークンを入れる.
 
-[GitHub Issues](https://github.com/cakephp/cakephp/issues) - Got issues? Please tell us!
+### 作成
+#### リクエスト
 
-[Roadmaps](https://github.com/cakephp/cakephp/wiki#roadmaps) - Want to contribute? Get involved!
+```bash
+curl -X POST -H "Content-Type: application/json" -H "X-Token:fb5dbd45360746078228542187bb2475" http://example.com/api/v1/threads -d {"title":"animals","tags":["cat","dog"] }
+```
 
+#### レスポンス
 
-## Contributing
+```
+{"id":"11","title":"animal","created_at":"2015-07-26 11:49:12","created_by":"8”}
+```
+### 取得
+#### リクエスト
 
-[CONTRIBUTING.md](CONTRIBUTING.md) - Quick pointers for contributing to the CakePHP project
+```bash
+curl -X GET -H "Content-Type: application/json" -H "X-Token:fb5dbd45360746078228542187bb2475" http://example.com/api/v1/threads/2
+```
 
-[CookBook "Contributing" Section (2.x)](http://book.cakephp.org/2.0/en/contributing.html) [(3.0)](http://book.cakephp.org/3.0/en/contributing.html) - Version-specific details about contributing to the project
+#### レスポンス
+
+```
+{"id":"2","title":"animals","tags":”cat,dog","total_posts":3}
+```
+
+### 削除
+#### リクエスト
+
+```bash
+curl -X DELETE -H "Content-Type: application/json" -H "X-Token:fb5dbd45360746078228542187bb2475" http://example.com/api/v1/threads/2
+```
+
+#### レスポンス
+
+```
+{"id":"2","created_at":"2015-07-26 11:49:12”}
+```
+
+### 検索
+#### リクエスト
+
+```bash
+curl -X GET -H "Content-Type: application/json" -H "X-Token:18beda5def56451a8cccdd7c62659bd1" "http://example.com/api/v1/threads?tags=cat,dog”
+```
+
+#### レスポンス
+
+```
+{"threads":["8","9","10”]}
+```
+
+## ポスト
+
+ポスト操作系APIは全てにHTTPヘッダ「X-Token」を追加し、
+値にログイン時の戻り値のアクセストークンを入れる.
+
+### 作成
+#### リクエスト
+
+```bash
+curl -X POST -H "Content-Type: application/json" -H "X-Token:fb5dbd45360746078228542187bb2475" http://example.com/api/v1/threads/8/posts -d '{"content":"poodle”}'
+```
+
+#### レスポンス
+
+```
+{"id":"5","thread_id":"8","content":"poodle","created_at":"2015-07-26 13:54:35","created_by":"12”}
+```
+
+### 取得
+#### リクエスト
+
+```bash
+curl -X GET -H "Content-Type: application/json" -H "X-Token:fb5dbd45360746078228542187bb2475" http://example.com/api/v1/threads/8/posts/2
+```
+
+#### レスポンス
+
+```
+{"id":"2","thread_id":"8","content":"shiba","created_at":"2015-07-25 13:57:25","created_by":"1”}
+```
+
+## エラー時レスポンス
+
+HTTPステータスコードは全て500.
+エラーレスポンスは全て{"message":エラー内容}の形式.
+
+```
+{"message":"invalid token”}
+```
+
+# todo
+* テストの充実
+* 例外発生時のメッセージの共通化
+* エラー発生時のレスポンスの詳細内容表示対応.
+
