@@ -37,4 +37,29 @@ class TagTest extends CakeTestCase {
 		parent::tearDown();
 	}
 
+  public function testValidation() {
+    $this->validate(true,'tag',1);
+    $this->validate(false,'',1);
+    $this->validate(false,'toolongtaggggggggggggggggggggggggggggggggggggggggggggggggggggggggg',1);
+  }
+
+  private function validate($expected,$tag,$thread_id) {
+    $this->Tag->set(
+      array(
+        'tag'=>$tag,
+        'thread_id'=>$thread_id,
+      )
+    );
+
+    $result = $this->Tag->validates();
+
+    if($expected) {
+      $this->assertTrue($result);
+    } else {
+      $this->assertFalse($result);
+    }
+  }
+
+
+
 }

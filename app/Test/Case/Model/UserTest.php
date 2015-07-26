@@ -33,8 +33,34 @@ class UserTest extends CakeTestCase {
  */
 	public function tearDown() {
 		unset($this->User);
-
 		parent::tearDown();
 	}
+  
+  public function testValidation() {
+    $this->validate(true,'ozawa','qwerty','ozawa@exapmle.com'); 
+    $this->validate(false,'','qwerty','exapmle.com'); 
+    $this->validate(false,'ozawa','','ozawa@exapmle.com'); 
+    $this->validate(false,'ozawa','qwerty',''); 
+    $this->validate(false,'overtenwords','qwerty','ozawa@exapmle.com'); 
+    $this->validate(false,'ozawa','qwerty','noatmark'); 
+  }
+
+  private function validate($expected,$name,$password,$mail) {
+    $this->User->set(
+      array(
+        'name'=>$name,
+        'password'=>$password,
+        'mail'=>$mail
+      )
+    );
+
+    $result = $this->User->validates();
+
+    if($expected) {
+      $this->assertTrue($result);
+    } else {
+      $this->assertFalse($result);
+    }
+  }
 
 }

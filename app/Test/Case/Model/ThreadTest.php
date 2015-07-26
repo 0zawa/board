@@ -37,4 +37,33 @@ class ThreadTest extends CakeTestCase {
 		parent::tearDown();
 	}
 
+  public function testValidation() {
+    $this->validate(true,1,'title','2015-07-26 00:00:00','2015-07-26 00:00:00');
+    $this->validate(false,1,'','2015-07-26 00:00:00','2015-07-26 00:00:00');
+    $this->validate(false,1,'title','','2015-07-26 00:00:00');
+    $this->validate(false,1,'title','2015-07-26 00:00:00','');
+    $this->validate(false,1,'title','invaliddate','2015-07-26 00:00:00');
+    $this->validate(false,1,'title','2015-07-26 00:00:00','invalid date');
+    $this->validate(false,1,'toolongtitleeeeeeeeeeeeeeeeeeeeeeeeeeeeee','2015-07-26 00:00:00','2015-07-26 00:00:00');
+  }
+
+  private function validate($expected,$user_id,$title,$created_at,$updated_at) {
+    $this->Thread->set(
+      array(
+        'user_id'=>$user_id,
+        'title'=>$title,
+        'created_at'=>$created_at,
+        'updated_at'=>$updated_at,
+        )
+      );
+
+    $result = $this->Thread->validates();
+
+    if($expected) {
+      $this->assertTrue($result);
+    } else {
+      $this->assertFalse($result);
+    }
+  }
+
 }
