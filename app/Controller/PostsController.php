@@ -9,7 +9,7 @@ class PostsController extends AppController {
 
   public $autoRender = false;
   public $uses = array('Post','Token');
-	public $components = array('Token');
+	//public $components = array('');
 
 /**
  * view method
@@ -18,13 +18,9 @@ class PostsController extends AppController {
  * @return void
  */
 	public function view($id = null) {
-		if (!$this->Post->exists($id)) {
-      $this->log('post not found:'.$id,'error');
-      /*
-      $response = array('status'=>'ng','message'=>'post not found');
-      $this->response->body(json_encode($response));
-      return;
-      */
+    $post_id = $this->request->params['post_id'];
+		if (!$this->Post->exists($post_id)) {
+      $this->log('post not found:'.$post_id,'error');
       return $this->send_ng('post not found');
 		}
 
@@ -32,24 +28,19 @@ class PostsController extends AppController {
     $user_id = $this->Token->get_user_id($token);
     if($user_id<0) {
       $this->log('invalid token:'.$token,'error');
-      /*
-      $response = array('status'=>'ng','message'=>'invalid token');
-      $this->response->body(json_encode($response));
-      */
       return $this->send_ng('invalid token');
     }
 
-		$options = array('conditions' => array('Post.' . $this->Post->primaryKey => $id));
-		$record = $this->Post->find('first', $options));
+		$options = array('conditions' => array('Post.' . $this->Post->primaryKey => $post_id));
+		$record = $this->Post->find('first', $options);
 
     $response = array(
-      'id'=>$record['post_id'],
-      'thread_id'=>$record['thread_id'],
-      'content'=>$record['content'],
-      'created_at'=>$record['created_at'],
-      'created_by'=>$record['user_id'],
+      'id'=>$record['Post']['post_id'],
+      'thread_id'=>$record['Post']['thread_id'],
+      'content'=>$record['Post']['content'],
+      'created_at'=>$record['Post']['created_at'],
+      'created_by'=>$record['Post']['user_id'],
     );
-    //$this->response->body(json_encode($response));
     return $this->send_ok($response);
 	}
 
@@ -82,8 +73,9 @@ class PostsController extends AppController {
 
 			$this->Post->create();
 			if ($this->Post->save($request)) {
+        $post_id = $this->Post->getLastInsertID();
         $response = array(
-          'status'=>'ok',
+          'id'=>$post_id,
           'thread_id'=>$thread_id,
           'content'=>$request->content,
           'created_at'=>$current,
