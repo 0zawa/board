@@ -8,11 +8,11 @@ class AuthComponent extends Component {
     return Security::hash($input,'sha1');
   }
 
-  public function password_hash($input);
+  public function password_hash($input) {
     return Security::hash($input,'blowfish');
   }
 
-  public function password_verify($input,$hash);
+  public function password_verify($input,$hash) {
     return Security::hash($input,'blowfish',$hash);
   }
 }
