@@ -8,7 +8,7 @@ App::uses('AppController', 'Controller');
 class PostsController extends AppController {
 
   public $autoRender = false;
-  public $uses = array('Post','Token');
+  public $uses = array('Post','Token','Thread');
 	//public $components = array('');
 
 /**
@@ -56,10 +56,6 @@ class PostsController extends AppController {
       $user_id = $this->Token->get_user_id($token);
       if($user_id<0) {
         $this->log('invalid token:'.$token,'error');
-        /*
-        $response = array('status'=>'ng','message'=>'invalid token');
-        $this->response->body(json_encode($response));
-        */
         return $this->send_ng('invalid token');
       }
 
@@ -81,14 +77,16 @@ class PostsController extends AppController {
           'created_at'=>$current,
           'created_by'=>$user_id,
         );
+
+        /// Threadの最終更新日時更新.
+        $this->Thread->id = $thread_id;
+        $this->Thread->save(array('updated_at'=>$current));
+
         return $this->send_ok($response);
 			} else {
         $this->log('failed to add post:'.$request->content, 'error');
-        //$response = array('status'=>'ng','message'=>'failed to add post');
         return $this->send_ng('failed to add post');
       }
-       
-      //$this->response->body(json_encode($response));
 		}
 	}
 }
