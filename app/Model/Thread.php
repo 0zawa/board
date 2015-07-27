@@ -1,7 +1,7 @@
 <?php
 App::uses('AppModel', 'Model');
 /**
- * Thread Model
+ * Threadモデル.
  *
  */
 class Thread extends AppModel {

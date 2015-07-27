@@ -37,6 +37,10 @@ class TokenTest extends CakeTestCase {
 		parent::tearDown();
 	}
 
+	/**
+	* バリデーションテスト.
+	*
+	*/
   public function testValidation() {
     $this->validate(true,1,'token','2015-07-26 00:00:00');
     $this->validate(false,1,'','2015-07-26 00:00:00');

@@ -1,9 +1,10 @@
 <?php
 App::uses('AppController', 'Controller');
+
+
 /**
- * Posts Controller
- *
- * @property Post $Post
+ * Post(メッセージ投稿)管理コントローラ
+ * 
  */
 class PostsController extends AppController {
 
@@ -12,7 +13,7 @@ class PostsController extends AppController {
 	//public $components = array('');
 
 /**
- * view method
+ * id指定のPost取得
  *
  * @param string $id
  * @return void
@@ -24,6 +25,7 @@ class PostsController extends AppController {
       return $this->send_ng('post not found');
 		}
 
+    /// アクセストークンチェック.
     $token = $this->request->header('X-Token');
     $user_id = $this->Token->get_user_id($token);
     if($user_id<0) {
@@ -45,14 +47,15 @@ class PostsController extends AppController {
 	}
 
 /**
- * add method
+ * Post追加
+ * 追加時には親Threadの更新日時も現在日時に更新する.
  *
  * @return void
  */
 	public function add() {
 		if ($this->request->is('post')) {
+      /// アクセストークンチェック.
       $token = $this->request->header('X-Token');
-
       $user_id = $this->Token->get_user_id($token);
       if($user_id<0) {
         $this->log('invalid token:'.$token,'error');
@@ -87,6 +90,10 @@ class PostsController extends AppController {
         $this->log('failed to add post:'.$request->content, 'error');
         return $this->send_ng('failed to add post');
       }
-		}
+		} else {
+      /// POSTメソッド以外での呼び出し
+      $this->log('invalid http method:', 'error');
+      return $this->send_ng('invalid http method');
+    }
 	}
 }

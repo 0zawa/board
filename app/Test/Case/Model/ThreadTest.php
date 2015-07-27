@@ -37,6 +37,10 @@ class ThreadTest extends CakeTestCase {
 		parent::tearDown();
 	}
 
+	/**
+	 * バリデーションテスト.
+	 *
+	 */
   public function testValidation() {
     $this->validate(true,1,'title','2015-07-26 00:00:00','2015-07-26 00:00:00');
     $this->validate(false,1,'','2015-07-26 00:00:00','2015-07-26 00:00:00');

@@ -1,20 +1,20 @@
 <?php
 App::uses('AppModel', 'Model');
 /**
- * Tag Model
+ * Tagモデル
  *
  */
 class Tag extends AppModel {
 
 /**
- * Primary key field
+ * プライマリーキー.
  *
  * @var string
  */
 	public $primaryKey = 'tag';
 
 /**
- * Validation rules
+ * バリデーションルール.
  *
  * @var array
  */

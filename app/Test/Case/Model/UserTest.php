@@ -36,6 +36,10 @@ class UserTest extends CakeTestCase {
 		parent::tearDown();
 	}
   
+	/**
+	* バリデーションテスト.
+	*
+	*/
   public function testValidation() {
     $this->validate(true,'ozawa','qwerty','ozawa@exapmle.com'); 
     $this->validate(false,'','qwerty','exapmle.com'); 

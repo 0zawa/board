@@ -32,11 +32,26 @@ App::uses('Controller', 'Controller');
  */
 class AppController extends Controller {
 
+  /**
+   * 処理成功時のレスポンスをjson_encodeして送信.
+   * 
+   * @param array $response レスポンス内容
+   * @return なし
+   */
   public function send_ok($response) {
     $this->response->statusCode(200);
     $this->response->body(json_encode($response));
   }
 
+  /**
+   * 処理失敗時のレスポンスをjson_encodeして送信.
+   * 
+   * @param $message 失敗理由.
+   * @return なし
+   * 
+   * @todo statusCodeをより適切なものに変えられるように.
+   * @todo エラーの詳細も含められるように.
+   */
   public function send_ng($message) {
     $this->response->statusCode(500);
     $this->response->body(json_encode(array('message'=>$message)));

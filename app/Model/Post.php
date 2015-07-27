@@ -1,20 +1,20 @@
 <?php
 App::uses('AppModel', 'Model');
 /**
- * Post Model
+ * Postモデル
  *
  */
 class Post extends AppModel {
 
 /**
- * Primary key field
+ * プライマリーキー
  *
  * @var string
  */
 	public $primaryKey = 'post_id';
 
 /**
- * Validation rules
+ * バリデーションルール.
  *
  * @var array
  */
