@@ -1,9 +1,9 @@
 <?php
 App::uses('AppController', 'Controller');
+
 /**
- * Threads Controller
+ * Thread管理コントローラ.
  *
- * @property Thread $Thread
  */
 class ThreadsController extends AppController {
 
@@ -11,11 +11,13 @@ class ThreadsController extends AppController {
   public $autoRender = false;
 
 /**
- * index method
+ * タグ指定でのThread検索
+ * 検索はOR条件で行う.
  *
- * @return void
  */
 	public function index() {
+    
+    /// アクセストークン検証.
     $token = $this->request->header('X-Token');
     $user_id = $this->Token->get_user_id($token);
     if($user_id < 0) {
@@ -24,8 +26,8 @@ class ThreadsController extends AppController {
       return;
     }
 
-    $tags = explode(',',$this->request->query('tags'));
-  
+    /// タグをOR条件で検索.
+    $tags = explode(',',$this->request->query('tags'));  
     $thread_records = $this->Tag->find('all',array('fields'=>'DISTINCT thread_id','conditions'=>array('tag'=>$tags)));
 
     $threads = array();
@@ -38,33 +40,33 @@ class ThreadsController extends AppController {
 	}
 
 /**
- * view method
+ * id指定でのThread取得.
  *
- * @throws NotFoundException
  * @param string $id
  * @return void
  */
 	public function view($id = null) {
 		if (!$this->Thread->exists($id)) {
       $this->log('therad not found:'.$id,'error');
-      $this->send_ng('thread not found');
-      return;
+      return $this->send_ng('thread not found');
 		}
     
+    /// アクセストークン検証.
     $token = $this->request->header('X-Token');
     $user_id = $this->Token->get_user_id($token);
     if($user_id < 0) {
       $this->log('invalid token:'.$token,'error');
-      $this->send_ng('invalid token');
-      return;
+      return $this->send_ng('invalid token');
     }
 
+    /// 指定thread_idのタグ取得.
     $tags = array();
     $tag_records = $this->Tag->find('all',array('fields'=>'tag','conditions'=>array('thread_id'=>$id)));
     foreach($tag_records as $record) {
       $tags[] = $record['Tag']['tag'];
     }
 
+    /// Postの数を取得.
     $posts_count = $this->Post->find('count',array('conditions'=>array('thread_id'=>$id)));
 
 		$options = array('conditions' => array('Thread.' . $this->Thread->primaryKey => $id));
@@ -79,7 +81,7 @@ class ThreadsController extends AppController {
 	}
 
 /**
- * add method
+ * Thread作成.
  *
  * @return void
  */
@@ -87,11 +89,11 @@ class ThreadsController extends AppController {
 		if ($this->request->is('post')) {
       $token = $this->request->header('X-Token');
       
+      /// アクセストークン検証.
       $user_id = $this->Token->get_user_id($token);
       if($user_id < 0) {
         $this->log('invalid token:'.$token,'error');
-        $this->send_ng('invalid token');
-        return;
+        return $this->send_ng('invalid token');
       }
 
       $request = $this->request->input('json_decode');
@@ -104,6 +106,7 @@ class ThreadsController extends AppController {
 			if ($this->Thread->save($request)) {
         $thread_id = $this->Thread->getLastInsertID();
 
+        /// タグ情報をTagテーブルに保存.
         foreach($request->tags as $tag) {
           $this->Tag->create();
           $this->Tag->save(array('tag'=>$tag,'thread_id'=>$thread_id));
@@ -116,20 +119,20 @@ class ThreadsController extends AppController {
           'created_at'=>$current,
           'created_by'=>$user_id,
         );
-        $this->send_ok($response);
+        return $this->send_ok($response);
 			} else {
         $this->log('failed to save post','error');
-        $this->send_ng('faield to save post');
+        return $this->send_ng('faield to save post');
 		} else {
       $this->log('invalid http method','error');
-      $this->send_ng('invalid http method');
+      return $this->send_ng('invalid http method');
     }
 	}
 
 
 
 /**
- * delete method
+ * POST削除.
  *
  * @throws NotFoundException
  * @param string $id
@@ -145,29 +148,27 @@ class ThreadsController extends AppController {
     $options = array('conditions' => array('Thread.' . $this->Thread->primaryKey => $id));
     $thread = $this->Thread->find('first', $options);
          
+    /// アクセストークン検証.
     $token = $this->request->header('X-Token');
-    
     $user_id = $this->Token->get_user_id($token);
     if($user_id < 0) {
       $this->log('invalid token:'.$token,'error');
-      $this->send_ng('invalid token');
-      return;
+      return $this->send_ng('invalid token');
     }
 
     $thread = $this->Thread->find('first',array('conditions'=>array('thread_id'=>$id,'user_id'=>$user_id)));
     if(empty($thread)) {
       $this->log('only owner can delete thread:'.$user_id,'error');
-      $this->send_ng('only owner can delete thread');
-      return;
+      return $this->send_ng('only owner can delete thread');
     }
 
 		$this->request->allowMethod('post', 'delete');
 		if ($this->Thread->delete()) {
       $response = array('id'=>$id,'created_at'=>$thread['Thread']['created_at']);
-      $this->send_ok($response);
+      return $this->send_ok($response);
 		} else {
       $this->log('failed to delete thread','error');
-     $this->send_ng('failed to delete thread');
+      return $this->send_ng('failed to delete thread');
 		}
 	}
 }

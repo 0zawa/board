@@ -1,21 +1,16 @@
 <?php
 App::uses('AppModel', 'Model');
 /**
- * User Model
+ * Userモデル.
  *
  */
 class User extends AppModel {
 
+  /// プライマリーキー.
   public $primaryKey = 'user_id';
-/**
- * Display field
- *
- * @var string
- */
-	//public $displayField = 'name';
 
 /**
- * Validation rules
+ * バリデーションルール.
  *
  * @var array
  */

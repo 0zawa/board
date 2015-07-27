@@ -1,20 +1,20 @@
 <?php
 App::uses('AppModel', 'Model');
 /**
- * Token Model
+ * Tokenモデル.
  *
  */
 class Token extends AppModel {
 
 /**
- * Primary key field
+ * プライマリーキー.
  *
  * @var string
  */
 	public $primaryKey = 'token';
 
 /**
- * Validation rules
+ * バリデーションルール.
  *
  * @var array
  */

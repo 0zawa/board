@@ -1,5 +1,7 @@
 <?php
 App::uses('AppController', 'Controller');
+
+
 /**
  * Login Controller
  * ユーザーのログイン処理を行う.
@@ -10,16 +12,17 @@ class LoginController extends AppController {
   public $autoRender = false;
   public $uses = array('User','Token');
 
-/**
- * index method
- *
- * @return void
- */
+	/**
+ 	 * ログイン処理
+ 	 * ユーザー名、パスワードで認証を行い、
+	 * 成功時にはアクセストークンを送信する.
+   */
 	public function index() {
     if($this->request->is('post')) {
       $request = $this->request->input('json_decode');
+			
+			/// パスワードをhashして、DBに同じものがあるか検索.
       $hash = $this->Auth->hash($request->password);
-
       $options = array('conditions' => array('name'=> $request->name,'password'=>$hash));
       $record = $this->User->find('first',$options);
 
@@ -27,7 +30,7 @@ class LoginController extends AppController {
         $this->log('user not found:'.$request->name, 'error');
         return $this->send_ng('user not found');
       } else {
-        /// @ref http://www.websec-room.com/2013/03/05/443
+				/// アクセストークン生成.        
         $uuid = bin2hex(openssl_random_pseudo_bytes(16));
         $token = array(
           'user_id'=>$record['User']['user_id'],

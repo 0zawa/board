@@ -37,6 +37,10 @@ class TagTest extends CakeTestCase {
 		parent::tearDown();
 	}
 
+	/**
+	* バリデーションテスト.
+	*
+	*/
   public function testValidation() {
     $this->validate(true,'tag',1);
     $this->validate(false,'',1);

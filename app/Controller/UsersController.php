@@ -12,7 +12,6 @@ class UsersController extends AppController {
   public $autoRender = false;
 
 /**
- * view method
  * ユーザーの取得.
  *
  * @param string $id
@@ -31,7 +30,6 @@ class UsersController extends AppController {
 	}
 
 /**
- * add method
  * ユーザーの追加.
  * @return void
  */
@@ -57,7 +55,7 @@ class UsersController extends AppController {
         return $this->send_ng('failed to add user');
       }
 		} else {
-      $this->log('invalid http method:'.$this->request->method(), 'error');
+      $this->log('invalid http method', 'error');
       return $this->send_ng('invalid htttp method');
     }
 	}
