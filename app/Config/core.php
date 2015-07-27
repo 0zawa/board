@@ -76,7 +76,8 @@
  */
 	Configure::write('Exception', array(
 		'handler' => 'ErrorHandler::handleException',
-		'renderer' => 'ExceptionRenderer',
+		//'renderer' => 'ExceptionRenderer',
+		'renderer' => 'BoardExceptionRenderer',
 		'log' => true
 	));
 
