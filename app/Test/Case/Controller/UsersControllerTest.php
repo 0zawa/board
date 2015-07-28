@@ -17,48 +17,39 @@ class UsersControllerTest extends ControllerTestCase {
 	);
 
 /**
- * testIndex method
- *
- * @return void
- */
-	public function testIndex() {
-		$this->markTestIncomplete('testIndex not implemented.');
-	}
-
-/**
- * testView method
+ * ユーザー取得テスト
  *
  * @return void
  */
 	public function testView() {
-		$this->markTestIncomplete('testView not implemented.');
+		$json_response = $this->testAction('/users/view/1');
+		$response = json_decode($json_response);
+		
+		$expected = array(
+			'User' => array('id' => 1, 'name' => 'ozawa'),
+		);
+		$this->assertEquals($expected, $result);
 	}
 
 /**
- * testAdd method
+ * ユーザー登録テスト
  *
  * @return void
  */
 	public function testAdd() {
-		$this->markTestIncomplete('testAdd not implemented.');
+		$data = array(
+    	'User' => array(
+        'name' => 'ozawa2',
+        'password' => 'rawpassword2',
+        'mail' => 'ozawa2@example.com',
+    	)
+    );
+		$json_response = $this->testAction('/users',array('data' => $data, 'method' => 'post'));
+		$response = json_decode($json_response);
+		
+		$expected = array(
+			'User' => array('id' => 2, 'name' => 'ozawa2'),
+		);
+		$this->assertEquals($expected, $result);
 	}
-
-/**
- * testEdit method
- *
- * @return void
- */
-	public function testEdit() {
-		$this->markTestIncomplete('testEdit not implemented.');
-	}
-
-/**
- * testDelete method
- *
- * @return void
- */
-	public function testDelete() {
-		$this->markTestIncomplete('testDelete not implemented.');
-	}
-
 }
