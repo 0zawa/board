@@ -37,7 +37,6 @@ class UsersController extends AppController {
 		if ($this->request->is('post')) {
       $request = $this->request->input('json_decode');
  
-$this->log($request,'debug');
       $request->password = $this->Auth->hash($request->password);
 
       if($this->User->find('count',array('conditions'=>array('name'=>$request->name)))>0) {
