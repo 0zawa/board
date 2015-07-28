@@ -22,7 +22,7 @@ class ThreadsController extends AppController {
     $user_id = $this->Token->get_user_id($token);
     if($user_id < 0) {
       $this->log('invalid token:'.$token,'error');
-     $this->send_ng('invalid token');
+      $this->send_ng('invalid token');
       return;
     }
 
@@ -35,7 +35,7 @@ class ThreadsController extends AppController {
       $threads[] = $record['Tag']['thread_id'];
     }
   
-    $response = array('status'=>'ok','threads'=>$threads);
+    $response = array('threads'=>$threads);
     $this->send_ok($response);
 	}
 
