@@ -113,7 +113,6 @@ class ThreadsController extends AppController {
         }
 
         $response = array(
-          'status'=>'ok',
           'id'=>$thread_id, 
           'title'=>$request->title,
           'created_at'=>$current,
