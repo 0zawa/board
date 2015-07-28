@@ -123,6 +123,7 @@ class ThreadsController extends AppController {
 			} else {
         $this->log('failed to save post','error');
         return $this->send_ng('faield to save post');
+      }
 		} else {
       $this->log('invalid http method','error');
       return $this->send_ng('invalid http method');
